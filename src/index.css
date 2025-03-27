@@ -2,3 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+.tab_container:hover .tooltip{
+    visibility: visible;
+}
+.tooltip{
+    visibility: hidden;
+    margin: auto;
+    transition: visibility ease 0.1s;
+}
+.editable-element{
+    border: 1px solid black;
+    padding: 2px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+

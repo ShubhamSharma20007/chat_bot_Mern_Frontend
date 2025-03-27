@@ -1,16 +1,13 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ChangeEvent, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import React from "react";
 import Header from "../../components/header/index.tsx";
-import { Box, Avatar, Typography, Button, FormControlLabel, Switch, Stack, styled } from "@mui/material";
+import { Box, Avatar, Typography, Button ,Stack, styled } from "@mui/material";
 import { useAuth } from "../../context/AuthContext.tsx";
-import ChatItem from "../../components/chatItem/index.tsx";
 import { IoIosSend } from "react-icons/io";
 import Tooltip from '@mui/material/Tooltip';
 import toast from "react-hot-toast";
 import { Instance } from "../../lib/Instance.ts";
-import Lottie from "react-lottie";
 import IconButton from '@mui/material/IconButton';
-import Gradient from "../../../public/lottie-animate.json";
 import {
   CHAT_DUPLICATE,
   CHAT_GET_TABS,
@@ -23,33 +20,29 @@ import {
 import { useSocket } from "../../context/SocketContext.tsx";
 import { FaRegCopy, FaRegEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-
 import { useSearchParams } from "react-router-dom";
-import prompt from "../../data/prompt.ts";
 import { AntSwitch } from "../../shared/switchTheme.ts";
-import ChatContainer from "../../components/chatContainer/index.tsx";
-type ChatMessageType = {
-  role: string;
-  content: string;
-  refusal?: boolean | null;
-  user_msg: string;
-  receiverId: string;
-};
-
+import LottieLoader from "../../components/lottie/index.tsx";
+import { generateAttributes,cleanupAttributes } from "../../utils/codeUtils.ts";
+import TextEditor from "../../components/text-editor/index.tsx";
+const ChatContainer = React.lazy(()=> import('../../components/chatContainer/index.tsx'))
 const Chat = () => {
   const { socket, chatMessages, setChatMessages,   
-    setPresentationComponent,
     presentationComponent  } = useSocket();
     const [isLoading, setIsLoading] = useState(false)
   const { user, isLoggedIn } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [editToggle,setEditToogle] = useState<string>('preview')
   const params = searchParams.get("tab");
+  const [tabTitles, setTabTitles] = useState<string[]>([]);
   const [DynamicComponent, setDynamicComponent]= useState<React.FC | null>(null)
+  const [orignalComponent, setOrignalComponent] = useState<React.FC | null>(null)
   const navigate = useNavigate();
   const [chatTabs, setChatTabs] = useState<any>([]);
   const [switchValue, setSwitchValue] = useState<boolean>()
   let textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   let chatContainer = useRef<HTMLElement | null>(null);
+  const [targetElement ,setTargetElement] = useState<HTMLElement | null>(null)
   const handleSendMessage = async () => {
     const inputContent = textAreaRef.current?.value as string;
     if (!inputContent.trim()) return;
@@ -108,16 +101,12 @@ const Chat = () => {
   // get all chats
 
   const getChats = async () => {
-
     try {
-      const req = await toast.promise(Instance.get(CHATS_GET, {
+      const req = await Instance.get(CHATS_GET, {
         params: {
           chatTabId: params,
         },
-      }), {
-        loading: 'Fetching Chats...',
-
-      })
+      });
       const res = await req.data;
       if (res.success) {
         setChatMessages(res.data.chats);
@@ -251,38 +240,43 @@ const Chat = () => {
     });
   };
 
-  function handleTitleOfTabs(tab: any) {
-    let message;
+
+
+  
+
+  function getTitleForTab(tab: any) {
+    let message = "New Chat";
     if (tab.userId.chats?.length > 0) {
       const res = tab.userId.chats.find(
         (firstTab: any) => firstTab.chatTabId.toString() === tab._id.toString()
       );
       if (res) {
-        res.user_msg?.length > 30
-          ? message = `${res.user_msg?.slice(0, 20)}...`
-          : message = res.user_msg
-      } else {
-        message = "New Chat";
+        message = res.user_msg?.length > 30 ? `${res.user_msg.slice(0, 20)}...` : res.user_msg;
       }
       if (tab.isDuplicate) {
-        message += ' (copy)'
+        message += " (copy)";
       }
-    } else {
-      message = "New Chat";
     }
-    return message
+    return message;
   }
+
+  useEffect(() => {
+    const updatedTitles = chatTabs.map((tab:any) => getTitleForTab(tab));
+    setTabTitles(updatedTitles);
+  }, [chatTabs]);
 
 
 function handleSwitchValue(e:React.ChangeEvent<HTMLInputElement>){
   const value = e.target.checked;
   setSwitchValue(value)
-  localStorage.setItem("switchValue", JSON.stringify(value))
 }
 
 
 
-const loadComponent = () => {
+
+
+
+const loadPresentationComponent = () => {
   let Component:any;
 
   try {
@@ -293,16 +287,13 @@ const loadComponent = () => {
     
 
     const cleanedCode = presentationComponent.trim();
-
-    // if (!cleanedCode.includes("function PresentationComponent")) {
-    //   throw new Error("Invalid component definition");
-    // }
-    const ComponentFactory = new Function("React", `
+    const ComponentConstrucFun = new Function("React", `
       ${cleanedCode}
       return PresentationComponent;
     `);
 
-    Component = ComponentFactory(React);
+    Component = ComponentConstrucFun(React);
+    setOrignalComponent(() =>cleanedCode ) 
     setDynamicComponent(() => Component); 
     setIsLoading(false)
   } catch (error:any) {
@@ -311,8 +302,11 @@ const loadComponent = () => {
     setIsLoading(false)
     console.error("Error loading dynamic component:", error);
   }
- 
 };
+
+// useEffect(()=>{
+//   setDynamicComponent(()=> PresentationComponent)
+// },[])
 
 useEffect(() => {
   if(switchValue ){
@@ -320,17 +314,15 @@ useEffect(() => {
     script.src = 'https://cdn.tailwindcss.com';
     script.async = true;
     script.onload = () => {
-      loadComponent();
+      loadPresentationComponent();
     };
 
     if (!document.querySelector('script[src="https://cdn.tailwindcss.com"]')) {
       document.head.appendChild(script);
     } else {
-      loadComponent();
+      loadPresentationComponent();
     }
-
   }
-  
 }, [presentationComponent]);
 
 
@@ -345,9 +337,34 @@ useEffect(()=>{
   }
 },[isLoading])
 
-useLayoutEffect(()=>{
-  setSwitchValue(localStorage.getItem("switchValue") ? JSON.parse(localStorage.getItem("switchValue") as string) : false)
-},[])
+
+////////////////////////////// Toggle and Edit Presentaiton //////////////////////////////
+
+
+function handleEditToogle(e:ChangeEvent<HTMLInputElement>){
+  const value = e.target.checked;
+  let output;
+  if(value){
+    output ='edit'
+  }else{
+    output = 'preview'
+  }
+  setEditToogle(output)
+}
+
+
+
+
+
+useEffect(() => {
+  const container = document.querySelector('.presentation-container') as HTMLDivElement | null;
+  if (!container) return;
+  if (editToggle === 'edit') {
+      generateAttributes(container,setTargetElement);
+  } else {
+    cleanupAttributes(container);
+  }
+}, [editToggle]);
 
 
 
@@ -355,10 +372,10 @@ useLayoutEffect(()=>{
 
   return (
     <>
-
-
       <Header />
-      
+      {
+        targetElement && editToggle == 'edit' && <TextEditor targetElement={targetElement} setTargetElement={setTargetElement} />
+      }
       <Box
         sx={{
           display: "flex",
@@ -373,7 +390,7 @@ useLayoutEffect(()=>{
         <Box
           sx={{
             display: { md: "flex", xs: "none", sm: "none" },
-            flex: 0.3,
+            width:'20%',
             flexDirection: "column",
           }}
         >
@@ -417,7 +434,10 @@ useLayoutEffect(()=>{
               px: 1,
             }}
           >
-            <Box
+            {
+              !switchValue ? 
+              <>
+               <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -456,7 +476,7 @@ useLayoutEffect(()=>{
                   return (
                     <Box position={'relative'}>
                       <Typography
-                        className={`line-clamp-1 capitalize ${params && params!.toString() === tab?._id.toString() ? "bg-[#4A90E2] text-white" : "bg-blue-300 "}`}
+                        className={`line-clamp-1  tab_container capitalize ${params && params!.toString() === tab?._id.toString() ? "bg-[#4A90E2] text-white" : "bg-blue-300 "}`}
                         onClick={() => {
                           handleTabChange(tab._id, idx);
                         }}
@@ -470,10 +490,10 @@ useLayoutEffect(()=>{
                           mx: "auto",
                         }}
                       >
-                        {handleTitleOfTabs(tab)}
+                        {tabTitles[idx]}
 
 
-                        <Tooltip title="Make Duplicate">
+                        <Tooltip title="Make Duplicate" className=" tooltip ">
                           <Box
                             onClick={() => {
                               handleDuplicateTab(tab._id)
@@ -507,7 +527,40 @@ useLayoutEffect(()=>{
             >
               Clear Chats
             </Button>
+              </> 
+              :  DynamicComponent 
+              // && presentationComponent.trim().length > 0
+                ?
+              <Stack direction="row" spacing={1} sx={{
+                alignItems: 'center', bgcolor: "#D9EAFD", borderRadius: 5,
+                mb: 2,
+                justifyContent: 'center',
+                display: 'flex',
+                flexDirection: 'row',
+                py: 2,
+                px: 1,
+              }}>
+                <Typography sx={{
+                  color: "black",
+                  fontSize: "14px",
+                  opacity : !switchValue ? 0.5 : 1
+                }}>Preview</Typography>
+                <AntSwitch 
+                
+                onChange={(e)=>{
+                  handleEditToogle(e)
+                }}  inputProps={{ 'aria-label': 'ant design' }} />
+                <Typography sx={{
+                  color: "black",
+                  fontSize: "14px",
+                  opacity : switchValue ? 0.5 : 1
+                }}>Edit</Typography>
+              </Stack>
+              : null
+            }
+           
           </Box>
+       
         </Box>
 
 {/*  result container */}
@@ -518,11 +571,11 @@ useLayoutEffect(()=>{
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            width: "100%",
+            width: "80%",
             borderRadius: 5,
            
             bgcolor: "#D9EAFD",
-            maxWidth: "75%",
+       
             flex: {
               md: 1,
               xs: 1,
@@ -534,22 +587,38 @@ useLayoutEffect(()=>{
           }}
         >
 
-         <Box sx={{
+         <Box
+         sx={{
            flex:1,
            overflowY:'auto',
            scrollbarWidth:'none'
-          }}>
+          }} >
            {/* user chats  and  presentation container*/}
            {
             !switchValue ?
+            <Suspense fallback={
+              <div className="w-full h-full flex justify-center items-center">
+                 <LottieLoader/>
+              </div>
+            }>
             <ChatContainer
             chatContainer={chatContainer}
             switchValue={switchValue}
             chatMessages={chatMessages}
             presentationComponent={presentationComponent}
           />
+            </Suspense>
           : 
-          DynamicComponent ? <DynamicComponent/> : ''
+          <>
+          {
+            !DynamicComponent ? 
+            <div className="w-full h-full flex justify-center items-center">
+                 <LottieLoader/>
+              </div>
+            :
+            DynamicComponent ? <DynamicComponent/> : ''
+          }
+          </>
            }
 
          </Box>

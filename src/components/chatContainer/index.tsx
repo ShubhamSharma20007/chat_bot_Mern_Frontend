@@ -1,8 +1,8 @@
 import React from 'react'
 import { Box, Typography } from '@mui/material';
 import ChatItem from '../chatItem';
-import Lottie from 'react-lottie';
-import Gradient from "../../../public/lottie-animate.json";
+import LottieLoader from '../lottie';
+
 
 const ChatContainer = (props:any) => {
   return (
@@ -37,20 +37,7 @@ const ChatContainer = (props:any) => {
                 alignItems: "center",
               }}
             >
-              <Box
-                sx={{
-                  width: "300px",
-                  height: "300px",
-                }}
-              >
-                <Lottie
-                  options={{
-                    loop: true,
-                    autoplay: true,
-                    animationData: Gradient,
-                  }}
-                />
-              </Box>
+              <LottieLoader/>
             </Box>
           )}
         </>

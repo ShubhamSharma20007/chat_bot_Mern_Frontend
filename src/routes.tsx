@@ -4,11 +4,10 @@ import Register from "./pages/auth/register";
 import Login from "./pages/auth/login";
 import AuthLayout from "./pages/auth/_layout";
 import Chat from "./pages/chat";
-import { useAuth } from "./context/AuthContext";
 import Preview from "./pages/preview";
 import Dashboard from "./pages/dashboard";
 
-const App = () => {
+const Router = () => {
   return (
     <Routes>
       {/* {auth.isLoggedIn && auth.user && ( */}
@@ -27,4 +26,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Router;
