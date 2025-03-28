@@ -33,7 +33,7 @@ function TextEditor({targetElement,setTargetElement}: {targetElement:HTMLElement
     { icon: <Italic size={18} />, tooltip: 'Italic' },
     { icon: <Underline size={18} />, tooltip: 'Underline' },
     { icon: <Strikethrough size={18} />, tooltip: 'Strikethrough' },
-    { icon: <Link size={18} />, tooltip: 'Insert Link' },
+    // { icon: <Link size={18} />, tooltip: 'Insert Link' },
   ];
 
   const alignmentButtons = [
@@ -80,7 +80,6 @@ function TextEditor({targetElement,setTargetElement}: {targetElement:HTMLElement
   //  handle font size change
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSize = parseInt(e.target.value);
-    
     setFontSize(newSize);
     if (targetElement) {
       targetElement.style.fontSize = `${newSize}px`;
@@ -162,11 +161,15 @@ const handleStrikethroughElement = () => {
   }
 }
 
-const handleLinkElement = () => {
-  if(targetElement){
 
+function handleAlignmentElement(alignment:string){
+  const alignmentValue = alignment.trim().toLowerCase().replace('align','').replace(' ','')
+  if(targetElement){
+      targetElement.style.textAlign = alignmentValue
+  
   }
 }
+
 
   useEffect(() => {
     if(targetElement){
@@ -232,8 +235,6 @@ const handleLinkElement = () => {
                   handleUnderlineElement()
                 }else if(button.tooltip === 'Strikethrough'){
                   handleStrikethroughElement()
-                }else if(button.tooltip === 'Insert Link'){
-                  handleLinkElement()
                 }
               }}
                 key={index}
@@ -254,6 +255,7 @@ const handleLinkElement = () => {
           <div className="flex items-center gap-1 pr-3 border-r border-gray-200 ">
             {alignmentButtons.map((button, index) => (
               <button
+              onClick={()=>{handleAlignmentElement(button.tooltip)}}
                 key={index}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 group relative"
                 title={button.tooltip}

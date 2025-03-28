@@ -24,7 +24,8 @@ import { useSearchParams } from "react-router-dom";
 import { AntSwitch } from "../../shared/switchTheme.ts";
 import LottieLoader from "../../components/lottie/index.tsx";
 import { generateAttributes,cleanupAttributes } from "../../utils/codeUtils.ts";
-import TextEditor from "../../components/text-editor/index.tsx";
+import TextEditor from "../../components/editor/text-editor/index.tsx";
+import ImgEditor from "../../components/editor/img-editor/index.tsx";
 const ChatContainer = React.lazy(()=> import('../../components/chatContainer/index.tsx'))
 const Chat = () => {
   const { socket, chatMessages, setChatMessages,   
@@ -242,8 +243,6 @@ const Chat = () => {
 
 
 
-  
-
   function getTitleForTab(tab: any) {
     let message = "New Chat";
     if (tab.userId.chats?.length > 0) {
@@ -271,42 +270,199 @@ function handleSwitchValue(e:React.ChangeEvent<HTMLInputElement>){
   setSwitchValue(value)
 }
 
+function PresentationComponent() {
+  const data = {
+  "title": "Hoili Presentation",
+  "slides": [
+    {
+      "title": "Introduction to Hoili",
+      "bulletPoints": [
+        "Overview of Hoili and its significance.",
+        "Cultural background and importance in the community.",
+        "Celebration details including date and location."
+      ],
+      "image": "https://images.unsplash.com/photo-1608363789086-9082f58e281f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3MjY4NDl8MHwxfHNlYXJjaHwxfHxJbnRyb2R1Y3Rpb24lMjB0byUyMEhvaWxpfGVufDB8fHx8MTc0Mjg4NTIyMXww&ixlib=rb-4.0.3&q=80&w=1080"
+    },
+    {
+      "title": "Traditions and Customs",
+      "bulletPoints": [
+        "Specific rituals performed during Hoili.",
+        "Traditional foods and their meanings.",
+        "Songs and dances associated with the festival."
+      ],
+      "image": "https://images.unsplash.com/photo-1722252798917-d8daa704a2b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3MjY4NDl8MHwxfHNlYXJjaHwxfHxUcmFkaXRpb25zJTIwYW5kJTIwQ3VzdG9tc3xlbnwwfHx8fDE3NDI4ODUyMjF8MA&ixlib=rb-4.0.3&q=80&w=1080"
+    },
+    {
+      "title": "Colors and Decorations",
+      "bulletPoints": [
+        "Symbolism of colors used in Hoili celebrations.",
+        "Common decorations and how they are made.",
+        "Community involvement in decorating spaces."
+      ],
+      "image": "https://images.unsplash.com/photo-1489864341077-e204d82219b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3MjY4NDl8MHwxfHNlYXJjaHwxfHxDb2xvcnMlMjBhbmQlMjBEZWNvcmF0aW9uc3xlbnwwfHx8fDE3NDI4ODUyMjF8MA&ixlib=rb-4.0.3&q=80&w=1080"
+    },
+    {
+      "title": "Celebration Activities",
+      "bulletPoints": [
+        "Games and activities typically seen during Hoili.",
+        "Role of community gatherings and events.",
+        "Safety tips for celebrating Hoili."
+      ],
+      "image": "https://images.unsplash.com/photo-1717347547110-2476ee5c7932?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3MjY4NDl8MHwxfHNlYXJjaHwxfHxDZWxlYnJhdGlvbiUyMEFjdGl2aXRpZXN8ZW58MHx8fHwxNzQyODIxNjY2fDA&ixlib=rb-4.0.3&q=80&w=1080"
+    },
+    {
+      "title": "Conclusion and Significance",
+      "bulletPoints": [
+        "Reflection on the impact of Hoili in modern times.",
+        "Importance of preserving traditions and customs.",
+        "Encouragement to participate and celebrate joyfully."
+      ],
+      "image": "https://images.unsplash.com/photo-1722252798917-d8daa704a2b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3MjY4NDl8MHwxfHNlYXJjaHwxfHxDb25jbHVzaW9uJTIwYW5kJTIwU2lnbmlmaWNhbmNlfGVufDB8fHx8MTc0Mjg4NTIyMXww&ixlib=rb-4.0.3&q=80&w=1080"
+    }
+  ]
+};
 
+  const layouts = [
+    {
+      container: "flex flex-col w-full max-w-7xl mx-auto md:flex-row rounded-2xl shadow-lg overflow-hidden",
+      imageWrapper: "md:w-1/2 relative group", 
+      contentWrapper: "md:w-1/2 p-8 space-y-6 backdrop-blur-sm bg-white/30"
+    },
+    {
+      container: "relative w-full max-w-7xl mx-auto rounded-2xl  overflow-hidden min-h-[500px]",
+      imageWrapper: "absolute inset-0 z-0",
+      contentWrapper: "relative z-10 p-8 bg-gradient-to-r from-white/90 w-full to-transparent text-white"
+    },
+    {
+      container: "grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-7xl mx-auto rounded-2xl  p-8",
+      imageWrapper: "relative aspect-square rounded-xl overflow-hidden",
+      contentWrapper: "flex flex-col justify-center space-y-6"
+    },
+     {
+      container: "flex flex-col w-full max-w-7xl mx-auto md:flex-row-reverse rounded-2xl shadow-lg overflow-hidden",
+      imageWrapper: "md:w-1/2 relative group", 
+      contentWrapper: "md:w-1/2 p-8 space-y-6 backdrop-blur-sm bg-white/30"
+    },
+    {
+      container: "flex flex-col items-center w-full max-w-7xl mx-auto rounded-2xl  p-12 text-center",
+      imageWrapper: "w-64 h-64 rounded-full overflow-hidden mx-auto mb-8",
+      contentWrapper: "max-w-2xl mx-auto space-y-6"
+    },
+   
+  ];
 
+  const gradients = [
+    "bg-gradient-to-br from-rose-100 via-pink-100 to-teal-100",
+    "bg-gradient-to-tr from-purple-100 via-violet-100 to-indigo-100", 
+    "bg-gradient-to-bl from-blue-100 via-sky-100 to-emerald-100",
+    "bg-gradient-to-tl from-amber-100 via-orange-100 to-yellow-100"
+  ];
 
+  return React.createElement('div',
+    {
+      className: "relative w-full  presentation-container  min-h-screen flex flex-col items-center justify-center gap-12 py-16 "
+    },
+    React.createElement('h1',
+      {
+        className: "text-6xl w-full text-center font-black  bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600 [text-shadow:_0_1px_2px_rgb(0_0_0_/_20%)] animate-float"
+      },
+      data.title
+    ),
+    data.slides.map((slide, index) => {
+      const layout = layouts[index % layouts.length];
+      return React.createElement('div',
+        {
+          className: layout.container + " " + gradients[index % gradients.length] + " transform transition-all duration-500 hover:scale-[1.02] mb-12"
+        },
+        [
+          React.createElement('div',
+            {
+              className: layout.imageWrapper
+            },
+            React.createElement('img',
+              {
+                src: slide.image,
+                className: "w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              }
+            )
+          ),
+          React.createElement('div',
+            {
+              className: layout.contentWrapper
+            },
+            [
+              React.createElement('h2',
+                {
+                  className: "text-3xl font-bold bg-clip-text text-gray-700 bg-gradient-to-r from-gray-400 to-gray-700 pb-2 border-b-2 border-gray-200/50"
+                },
+                slide.title
+              ),
+              React.createElement('ul',
+                {
+                  className: "space-y-4 pt-6"
+                },
+                slide.bulletPoints.map(point =>
+                  React.createElement('li',
+                    {
+                      className: "flex items-center gap-4 text-gray-700 transform transition-all duration-300 hover:translate-x-2"
+                    },
+                    [
+                      React.createElement('span',
+                        {
+                          className: "text-2xl text-gray-600 rotate-12"
+                        },
+                        "✦"
+                      ),
+                      React.createElement('span',
+                        {
+                          className: "font-medium leading-relaxed text-md"
+                        },
+                        point
+                      )
+                    ]
+                  )
+                )
+              )
+            ]
+          )
+        ]
+      );
+    })
+  );
+}
 
 
 const loadPresentationComponent = () => {
-  let Component:any;
+  // let Component:any;
 
-  try {
-    if (!presentationComponent) {
-      throw new Error("presentationComponent is empty or undefined");
-    }
-      console.log("Raw presentationComponent:", presentationComponent);
+  // try {
+  //   if (!presentationComponent) {
+  //     throw new Error("presentationComponent is empty or undefined");
+  //   }
+  //     console.log("Raw presentationComponent:", presentationComponent);
     
 
-    const cleanedCode = presentationComponent.trim();
-    const ComponentConstrucFun = new Function("React", `
-      ${cleanedCode}
-      return PresentationComponent;
-    `);
+  //   const cleanedCode = presentationComponent.trim();
+  //   const ComponentConstrucFun = new Function("React", `
+  //     ${cleanedCode}
+  //     return PresentationComponent;
+  //   `);
 
-    Component = ComponentConstrucFun(React);
-    setOrignalComponent(() =>cleanedCode ) 
-    setDynamicComponent(() => Component); 
-    setIsLoading(false)
-  } catch (error:any) {
-    setDynamicComponent(null);
-    toast.dismiss("presentation")
-    setIsLoading(false)
-    console.error("Error loading dynamic component:", error);
-  }
+  //   Component = ComponentConstrucFun(React);
+  //   setOrignalComponent(() =>cleanedCode ) 
+  //   setDynamicComponent(() => Component); 
+  //   setIsLoading(false)
+  // } catch (error:any) {
+  //   setDynamicComponent(null);
+  //   toast.dismiss("presentation")
+  //   setIsLoading(false)
+  //   console.error("Error loading dynamic component:", error);
+  // }
 };
 
-// useEffect(()=>{
-//   setDynamicComponent(()=> PresentationComponent)
-// },[])
+useEffect(()=>{
+  setDynamicComponent(()=> PresentationComponent)
+},[])
 
 useEffect(() => {
   if(switchValue ){
@@ -360,7 +516,7 @@ useEffect(() => {
   const container = document.querySelector('.presentation-container') as HTMLDivElement | null;
   if (!container) return;
   if (editToggle === 'edit') {
-      generateAttributes(container,setTargetElement);
+    generateAttributes(container,setTargetElement);
   } else {
     cleanupAttributes(container);
   }
@@ -373,9 +529,7 @@ useEffect(() => {
   return (
     <>
       <Header />
-      {
-        targetElement && editToggle == 'edit' && <TextEditor targetElement={targetElement} setTargetElement={setTargetElement} />
-      }
+
       <Box
         sx={{
           display: "flex",
@@ -586,7 +740,11 @@ useEffect(() => {
             py: 2,
           }}
         >
-
+      {
+      targetElement?.tagName !== 'IMG' ?
+      targetElement && editToggle == 'edit' && <TextEditor targetElement={targetElement} setTargetElement={setTargetElement} />
+      :  targetElement && editToggle == 'edit' && <ImgEditor targetElement={targetElement} setTargetElement={setTargetElement} />
+}
          <Box
          sx={{
            flex:1,
